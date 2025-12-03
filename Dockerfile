@@ -44,7 +44,9 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       libcap2-bin \
       procps \
-      ca-certificates && \
+      ca-certificates \
+      python3 python3-minimal python3-pip \
+      **gcc g++ libc6-dev** && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy installed isolate files from builder
@@ -56,7 +58,7 @@ RUN chown root:root /usr/local/bin/isolate && \
     chmod 4755 /usr/local/bin/isolate
 
 # Create non-root user for sandbox execution
-RUN useradd -m -s /usr/sbin/nologin judgeuser && \
+RUN useradd -m -s /bin/bash judgeuser && \
     mkdir -p /app /var/local/lib/isolate && \
     chown -R judgeuser:judgeuser /app /var/local/lib/isolate
 
