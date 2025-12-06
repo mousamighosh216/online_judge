@@ -1,0 +1,7 @@
+{
+  "id": "job1",
+  "lang": "c",
+  "files_dir": "tests/main.c",
+  "time_limit_ms": 2000,
+  "memory_limit_kb": 65536
+}
