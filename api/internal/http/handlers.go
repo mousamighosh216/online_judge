@@ -3,20 +3,18 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
 
-	"judge_project/api/internal/db"
 	"judge_project/api/internal/submissions"
-
-	"github.com/redis/go-redis/v9"
 )
 
 type Handler struct {
 	SubmissionService *submissions.Service
-	DB                *db.Postgres // or *sql.DB
-	Redis             *redis.Client
+	// DB                *db.Postgres // or *sql.DB
+	// Redis             *redis.Client
 }
 
 // New creates the HTTP handler (router + handlers)
@@ -64,23 +62,28 @@ func (h *Handler) ready(w http.ResponseWriter, r *http.Request) {
 		"status":   "ready",
 	}
 
-	// 1️⃣ Check Postgres
+	// Check Postgres
 	if err := h.SubmissionService.DB.Pool.Ping(ctx); err != nil {
+		log.Println("Postgres Ping failed:", err)
 		status["postgres"] = "down"
 		status["status"] = "not_ready"
 		w.WriteHeader(http.StatusServiceUnavailable)
-	} else {
-		// 2️⃣ Check Redis
-		if err := h.SubmissionService.Queue.Client.Ping(ctx).Err(); err != nil {
-			status["redis"] = "down"
-			status["status"] = "not_ready"
-			w.WriteHeader(http.StatusServiceUnavailable)
-		} else {
-			w.WriteHeader(http.StatusOK)
-		}
+		_ = json.NewEncoder(w).Encode(status)
+		return
+	}
+
+	// Check Redis
+	if err := h.SubmissionService.Queue.Client.Ping(ctx).Err(); err != nil {
+		log.Println("Redis Ping failed:", err)
+		status["redis"] = "down"
+		status["status"] = "not_ready"
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_ = json.NewEncoder(w).Encode(status)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(status)
 }
 

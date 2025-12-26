@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: oj
       POSTGRES_USER: ojuser
-      POSTGRES_PASSWORD: ******
+      POSTGRES_PASSWORD: tempPASS
     ports:
       - "5432:5432"
     volumes:
@@ -17,8 +17,10 @@ services:
     ports:
       - "6379:6379"
 
-api:
-    image: oj-api-image
+  api:
+    build:
+      context: ./api   # path to your API code with Dockerfile
+      dockerfile: Dockerfile
     container_name: oj-api
     depends_on:
       - postgres
@@ -26,13 +28,10 @@ api:
     ports:
       - "8080:8080"
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: oj
-      DB_USER: ojuser
-      DB_PASSWORD: tempPASS
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+        DATABASE_URL: postgres://ojuser:tempPASS@postgres:5432/oj?sslmode=disable
+        REDIS_ADDR: redis:6379
+        REDIS_PASSWORD: ""
+        OJ_WORKDIR: /app/jobs
     restart: unless-stopped
 
 volumes:

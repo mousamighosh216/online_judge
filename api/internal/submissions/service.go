@@ -171,3 +171,10 @@ func (s *Service) UpdateSubmissionStatus(
 
 	return err
 }
+
+func NewService(db *db.Postgres, q *queue.RedisQueue) *Service {
+	return &Service{
+		DB:    db,
+		Queue: q,
+	}
+}

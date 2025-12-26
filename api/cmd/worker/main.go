@@ -35,7 +35,7 @@ func main() {
 	}
 
 	// Docker executor
-	exec := executor.NewExecutor(cfg.WorkDir)
+	exec := executor.New(cfg.WorkDir)
 
 	log.Println("Worker started. Waiting for submissions...")
 
